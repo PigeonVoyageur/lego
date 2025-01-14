@@ -424,6 +424,21 @@ const VINTED = [
 // 2. Compute the p5 price value of the listing
 // 3. Compute the p25 price value of the listing
 // The p25 value (25th percentile) is the lower value expected to be exceeded in 25% of the vinted items
+// Extract prices as numbers
+const prices = VINTED.map(item => parseFloat(item.price));
+
+const sortedPrices = [...prices].sort((a, b) => a - b);
+
+const averagePrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+prices.sort((a, b) => a - b);
+const p5Index = Math.floor(0.05 * prices.length);
+const p25Index = Math.floor(0.25 * prices.length);
+const p5 = prices[p5Index];
+const p25 = prices[p25Index];
+console.log("Average Price:", averagePrice.toFixed(2));
+console.log("5th Percentile Price (p5):", p5Price.toFixed(2));
+console.log("25th Percentile Price (p25):", p25Price.toFixed(2));
 
 // 🎯 TODO 12: Very old listed items
 // // 1. Log if we have very old items (true or false)
