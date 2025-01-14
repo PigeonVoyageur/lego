@@ -29,7 +29,7 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 0. I have 2 favorite lego sets shopping communities stored in MY_FAVORITE_DEALERS variable
 // 1. Create a new variable and assign it the link of the lego set with the highest reduction I can find on these 2 websites
 // 2. Log the variable
-
+var lego = {name: 'Bonne Promo', url: 'https://www.dealabs.com/bons-plans/lego-sonic-76992-2976213'}
 /**
  * 🧱
  * Easy 😁?
@@ -42,29 +42,44 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 🎯 TODO 2: Number of deals
 // 1. Create a variable and assign it the number of deals
 // 2. Log the variable
-
+var numberOfDeals=deals.length
+console.log(numberOfDeals)
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
 // 2. Log the variable
 // 3. Log how many shopping communities we have
-
+var shoppingCommunities = deals.map(deal => deal.community);
+console.log(shoppingCommunities)
+var shoppingCommunitiesUnique = [...new Set(shoppingCommunities)];
+console.log(shoppingCommunitiesUnique)
 // 🎯 TODO 4: Sort by price
 // 1. Create a function to sort the deals by price
 // 2. Create a variable and assign it the list of sets by price from lowest to highest
 // 3. Log the variable
-
+function sortDealsByPrice(deals){
+  return deals.sort((a,b)=>a.price - b.price);
+}
+const sortedDealsByPrice=sortDealsByPrice([...deals])
+console.log(sortedDealsByPrice)
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
 // 2. Create a variable and assign it the list of deals by date from recent to old
 // 3. Log the variable
-
+function sortDealsByDate(deals){
+  return deals.sort((a,b)=>new Date(b.price) - new Date(a.price));
+}
+const sortedDealsByDate=sortDealsByDate([...deals])
+console.log(sortedDealsByDate)
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 // 2. Log the list
-
+const filteredDeals=deals.filter(deal=>deal.discount>=50&&deal.discount<=75)
+console.log(filteredDeals)
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
 // 2. Log the average
+const averageDiscount = deals.reduce((sum, deal) => sum + deal.discount, 0) / deals.length;
+console.log(averageDiscount) //40
 
 /**
  * 🏎
@@ -88,15 +103,36 @@ console.log(MY_FAVORITE_DEALERS[0]);
 //
 // 2. Log the variable
 // 3. Log the number of deals by community
+const communities = deals.reduce((acc, deal) => {
+  const { community } = deal;
+  if (!acc[community]) {
+    acc[community] = [];
+  }
+  acc[community].push(deal);
+  return acc;
+}, {});
+for (const [communityName, dealsList] of Object.entries(communities)) {
+  console.log(`Community "${communityName}" has ${dealsList.length} deals.`);
+}
 
 // 🎯 TODO 9: Sort by price for each community
 // 1. For each community, sort the deals by discount price, from highest to lowest
 // 2. Log the sort
-
+Object.keys(communities).forEach(community => {
+  communities[community].sort((a, b) => b.price - a.price);
+});
+for (const [community, sortedDeals] of Object.entries(communities)) {
+  console.log(`Community "${community}":`, sortedDeals);
+}
 // 🎯 TODO 10: Sort by date for each community
 // 1. For each set, sort the deals by date, from old to recent
 // 2. Log the sort
-
+Object.keys(communities).forEach(community => {
+  communities[community].sort((a, b) => new Date(b.published) - new Date(a.published));
+});
+for (const [community, sortedDeals] of Object.entries(communities)) {
+  console.log(`Community "${community}":`, sortedDeals);
+}
 
 /**
  * 🧥
