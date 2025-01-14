@@ -443,11 +443,18 @@ console.log("25th Percentile Price (p25):", p25Price.toFixed(2));
 // 🎯 TODO 12: Very old listed items
 // // 1. Log if we have very old items (true or false)
 // // A very old item is an item `published` more than 3 weeks ago.
-
+const threeWeeksAgo = new Date(Date.now()-21*24*60*60*1000);
+const oldItemsList = VINTED.filter(item => {
+  const publishedDate = new Date(item.published);
+  return publishedDate < threeWeeksAgo;
+});
+console.log("List of very old items:", oldItemsList);
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
+const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
 
+console.log("Specific item:", specificItem);
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
