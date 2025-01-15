@@ -483,7 +483,8 @@ let camera = sealedCamera;
 camera.favorite = true;
 
 // 1. Log `sealedCamera` and `camera` variables
-// 2. What do you notice?
+// 2. What do you notice? 
+// Comme sealedCamera et camera pointent vers le même objet, l'ajout de favorite à camera se reflétera automatiquement dans sealedCamera.
 
 // we make (again) a new assignment again
 sealedCamera = {
@@ -495,9 +496,12 @@ sealedCamera = {
 };
 
 // 3. Update `camera` property with `favorite` to true WITHOUT changing sealedCamera properties
+camera = { ...sealedCamera }; 
+camera.favorite = true;
+console.log("sealedCamera:", sealedCamera);
+console.log("camera:", camera);
 
-
-// 🎯 TODO 11: Compute the profitability
+// 🎯 TODO 16: Compute the profitability
 // From a specific deal called `deal`
 const deal = {
   'title':  'La caméra Hommage à Walt Disney',
@@ -508,7 +512,9 @@ const deal = {
 
 // 1. Compute the potential highest profitability based on the VINTED items
 // 2. Log the value
-
+const profitability = ((deal.retail - deal.price) / deal.price) * 100;
+console.log(`${deal.title}: Rentabilité de ${profitability.toFixed(2)}%`);
+// La caméra Hommage à Walt Disney: Rentabilité de 33.35%
 
 
 /**
@@ -520,3 +526,6 @@ const deal = {
 // 🎯 LAST TODO: Save in localStorage
 // 1. Save MY_FAVORITE_DEALERS in the localStorage
 // 2. log the localStorage
+localStorage.setItem("MY_FAVORITE_DEALERS", JSON.stringify(MY_FAVORITE_DEALERS));
+const storedDealers = JSON.parse(localStorage.getItem("MY_FAVORITE_DEALERS"));
+console.log("Stored MY_FAVORITE_DEALERS:", storedDealers);
