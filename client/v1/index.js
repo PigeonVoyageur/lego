@@ -452,14 +452,21 @@ console.log("List of very old items:", oldItemsList);
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
+
 const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
 
 console.log("Specific item:", specificItem);
+
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
 
-// 🎯 TODO 5: Save a favorite item
+const updatedVinted = VINTED.filter(item => item.uuid !== 'f2c5377c-84f9-571d-8712-98902dcbb913');
+console.log("Updated list of items:", updatedVinted);
+// On pouvait utiliser splice(index) pour retirer directement l'élément de la liste au lieu de créer une nouvelle liste
+VINTED.splice(VINTED.findIndex(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913'), 1);
+
+// 🎯 TODO 15: Save a favorite item
 // We declare and assign a variable called `sealedCamera`
 let sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
