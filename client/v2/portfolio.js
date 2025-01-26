@@ -36,6 +36,7 @@ const filterMostCommentedButton = document.querySelector('#filter-most-commented
 const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
 const selectSortDate = document.querySelector('#sort-select');
+const inputLegoSetId = document.querySelector('#lego-set-id-select');
 
 /**
  * Set global value
@@ -247,3 +248,161 @@ filterMostCommentedButton.addEventListener('click', async ()=>{
     render(sortedDeals, currentPagination);
   }
  });
+
+ /**
+  * Fetch Vinted sales for a given LEGO set id
+  * Nouvelle fonction pour récupérer les ventes Vinted pour un set LEGO donn
+  * @param  {String} id - LEGO set id
+  * @return {Array} - List of sales
+  */
+ const fetchSales = async (id) => {
+  if (!id || id.trim() === '') {
+    console.log('ID is empty');
+    return { result: [] };
+  }
+
+  try {
+    console.log(`Fetching sales for ID: ${id}`);
+    const response = await fetch(`https://lego-api-blue.vercel.app/sales?id=${id}`);
+    const body = await response.json();
+
+    if (body.success !== true) {
+      console.error('API Error:', body);
+      return { result: [] };
+    }
+
+    console.log('Fetched sales:', body.data);
+    return body.data; // This should be an object with a 'result' property
+  } catch (error) {
+    console.error('Fetch error:', error);
+    return { result: [] };
+  }
+};
+
+
+ /**
+  * Affiche les ventes
+  * Render Vinted Sales for a given LEGO set id
+  * @param  {Array} sales - List of sales
+  */
+ const renderSales = (sales) => {
+  // Assurez-vous d'accéder à sales.result, car sales est un objet avec une propriété 'result'
+  const salesArray = sales.result || [];
+
+  console.log('Sales to render:', salesArray); // Vérifiez ce qui est passé à la fonction
+
+  const sectionSales = document.querySelector('#sales');
+  const fragment = document.createDocumentFragment();
+  const div = document.createElement('div'); 
+
+  if (salesArray.length === 0) {
+    div.innerHTML = '<p>No sales available for this set.</p>';
+  } else {
+    const template = salesArray.map(sale => `
+      <div class="sale">
+          <h3><a href="${sale.link}" target="_blank">${sale.title}</a></h3>
+          <p>Price: ${sale.price}€</p>
+          <span>Published: ${sale.published}</span> <!-- Affichage de la date formatée -->
+      </div>
+    `).join('');
+    div.innerHTML = template;
+  }
+
+  fragment.appendChild(div);
+  sectionSales.innerHTML = '<h2>Vinted Sales</h2>';
+  sectionSales.appendChild(fragment);
+};
+
+
+
+/**
+ * Evenement pour afficher les ventes
+ */
+selectLegoSetIds.addEventListener('change', async (event) => {
+  const selectedSetId = event.target.value;
+  if (!selectedSetId) return ; 
+  const sales = await fetchSales(selectedSetId);
+  renderSales(sales);
+});
+
+/**
+ * FOnction pour rechercher les ventes dès que l'utilisateur change l'ID
+ */
+inputLegoSetId.addEventListener('input', async (event) => {
+  const enteredId = event.target.value.trim(); // Récupère et nettoie l'ID entré
+  console.log(enteredId);
+  if (!enteredId) {
+    // Si l'ID est vide, efface les résultats des ventes
+    renderSales([]);
+    return;
+  }
+  const sales = await fetchSales(enteredId); // Recherche les ventes pour cet ID
+  console.log('Sales being passed to renderSales:', sales);
+  renderSales(sales); // Affiche les ventes trouvées
+});
+
+/**
+ * Fonction pour calculer la moyenne des prix
+ * @param {Array} sales - Liste des ventes
+ * @return {Number} - Moyenne des prix
+ */
+const calculateAveragePrice = (sales) => {
+  if (sales.length === 0) {
+    return 0;
+  }
+    const totalPrice = sales.reduce((sum, sale) => sum + parseFloat(sale.price), 0);
+    return (totalPrice / sales.length).toFixed(2);
+};
+
+/**
+ * Fonction pour calculer un percentile donné
+ * @param {Array} sales - Liste des ventes
+ * @param {Number} percentile - Valeur du percentile (5, 25, 50)
+ * @return {Number} - Valeur du percentile
+ */
+const calcilatePercentile = (sales, percentile) => {
+  if (sales.length === 0) {
+    return 0;
+  }
+  const sortedPrices = sales.map(sale => sale.price).sort((a, b) => a - b);
+  const index = Math.ceil(percentile / 100 * sortedPrices.length);
+  return sortedPrices[index - 1];
+}
+
+/** 
+ * Fonction pour calculer et afficher les indicateurs
+ * @param {Array} sales - Liste des ventes
+ */
+const displayPriceIndicators = (sales) => {
+  const averagePrice = calculateAveragePrice(sales);
+  const p5Price = calcilatePercentile(sales, 5);
+  const p25Price = calcilatePercentile(sales, 25);
+  const p50Price = calcilatePercentile(sales, 50);
+  console.log('Indicators:', { averagePrice, p5Price, p25Price, p50Price, salesLength: sales.length });
+  // Update the DOM elements
+  document.querySelector('#indicators #nbSales').textContent = sales.length;
+  document.querySelector('#indicators #avg').textContent = sales.length ? `${averagePrice}€` : 'N/A';
+  document.querySelector('#indicators #p5').textContent = sales.length ? `${p5Price}€` : 'N/A';
+  document.querySelector('#indicators #p25').textContent = sales.length ? `${p25Price}€` : 'N/A';
+  document.querySelector('#indicators #p50').textContent = sales.length ? `${p50Price}€` : 'N/A';
+};
+
+//Utilisation de la fonction dans le contexte de récupération des ventes
+const fetchSalesAndDisplayIndicators = async (id) => {
+  const salesData = await fetchSales(id);
+  if (salesData && salesData.result && salesData.result.length > 0) {
+    displayPriceIndicators(salesData.result);
+  } else {
+    console.log('Aucune vente disponible');
+    // Optionally, reset the indicators to 0 or N/A
+    displayPriceIndicators([]);
+  }
+};
+//Ecouter l'événement sur l'input pour afficher les indicateurs
+inputLegoSetId.addEventListener('input', async (event) => {
+  const enteredId = event.target.value.trim();
+  if (!enteredId) {
+    return;
+  }
+  fetchSalesAndDisplayIndicators(enteredId);
+});
