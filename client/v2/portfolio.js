@@ -379,6 +379,7 @@ const displayPriceIndicators = (sales) => {
   const p25Price = calcilatePercentile(sales, 25);
   const p50Price = calcilatePercentile(sales, 50);
   console.log('Indicators:', { averagePrice, p5Price, p25Price, p50Price, salesLength: sales.length });
+  updateLifetimeValue(sales);
   // Update the DOM elements
   document.querySelector('#indicators #nbSales').textContent = sales.length;
   document.querySelector('#indicators #avg').textContent = sales.length ? `${averagePrice}€` : 'N/A';
@@ -406,3 +407,61 @@ inputLegoSetId.addEventListener('input', async (event) => {
   }
   fetchSalesAndDisplayIndicators(enteredId);
 });
+
+/**
+ * Calculate Lifetime value for a given set of sales
+ * @param {Array} sales
+ * @returns {string} Lifetime value in days
+ */
+const calculateLifetimeValue = (sales) => {
+  if (!sales || sales.length === 0) {
+    return 'No sales data';
+  }
+
+  // Convert all `published` dates to timestamps
+  const dates = sales.map(sale => new Date(sale.published).getTime());
+
+  // Find the earliest and latest dates
+  const firstDate = Math.min(...dates); // First published
+  const lastDate = Math.max(...dates);  // Last published
+
+  // Calculate the difference in days
+  const diffInMilliseconds = lastDate - firstDate;
+  const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+  return `${diffInDays} days`;
+};
+
+/**
+ * Update Lifetime value in the Indicators section
+ * @param {Array} sales
+ */
+const updateLifetimeValue = (sales) => {
+  const lifetimeElement = document.querySelector('#indicators #lifetime');
+  const lifetimeValue = calculateLifetimeValue(sales);
+  lifetimeElement.textContent = lifetimeValue;
+  const lifetimeElementToday = document.querySelector('#indicators #lifetimeToday');
+  const lifetimeValueToday = calculateLifetimeValueToday(sales);
+  lifetimeElementToday.textContent = lifetimeValueToday;
+};
+
+// Example usage: Call this function after fetching sales for a given set ID
+// updateLifetimeValue(fetchedSales);
+
+const calculateLifetimeValueToday = (sales) => {
+  if (!sales || sales.length === 0) {
+    return 'No sales data';
+  }
+
+  // Convert all `published` dates to timestamps
+  const dates = sales.map(sale => new Date(sale.published).getTime());
+
+  // Find the earliest and latest dates
+  const firstDate = Math.min(...dates); // First published
+  const today = new Date().getTime(); // Today's date
+  // Calculate the difference in days
+  const diffInMilliseconds = today - firstDate;
+  const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
+
+  return `${diffInDays} days`;
+};
