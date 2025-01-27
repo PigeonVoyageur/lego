@@ -441,6 +441,10 @@ const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-
 
 console.log("Specific item:", specificItem);
 
+const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
+
+console.log("Specific item:", specificItem);
+
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
