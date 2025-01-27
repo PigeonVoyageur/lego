@@ -437,8 +437,13 @@ const p25Index = Math.floor(0.25 * prices.length);
 const p5 = prices[p5Index];
 const p25 = prices[p25Index];
 console.log("Average Price:", averagePrice.toFixed(2));
+<<<<<<< HEAD
 console.log("5th Percentile Price:", p5Price.toFixed(2));
 console.log("25th Percentile Price :", p25Price.toFixed(2));
+=======
+console.log("5th Percentile Price (p5):", p5Price.toFixed(2));
+console.log("25th Percentile Price (p25):", p25Price.toFixed(2));
+>>>>>>> e435ca1 (TODO 11)
 
 // 🎯 TODO 12: Very old listed items
 // // 1. Log if we have very old items (true or false)
