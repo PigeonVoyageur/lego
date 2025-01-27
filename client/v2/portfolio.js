@@ -80,7 +80,7 @@ const fetchDeals = async (page = 1, size = 6) => {
 const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
-
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
    // Fonction pour formater la date
    const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000); // Conversion du timestamp en millisecondes
@@ -89,8 +89,12 @@ const renderDeals = deals => {
 
   const template = deals
     .map(deal => {
+      const isFavorite = favorites.some(fav => fav.uuid === deal.uuid);
       return `
       <div class="deal" id=${deal.uuid}>
+        <button class="favorite-btn" data-uuid="${deal.uuid}" aria-label="Add to favorites">
+          ${isFavorite ? '❤️' : '🤍'}
+        </button>
         <span>${deal.id}</span>
         <a href="${deal.link}">${deal.title}</a>
         <span>${deal.price +'€'}</span>
@@ -107,6 +111,13 @@ const renderDeals = deals => {
   fragment.appendChild(div);
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
+
+  document.querySelectorAll('.favorite-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const uuid = e.target.dataset.uuid;
+    toggleFavorite(deals.find(deal => deal.uuid === uuid));
+  });
+  });
 };
 
 /**
@@ -465,3 +476,41 @@ const calculateLifetimeValueToday = (sales) => {
 
   return `${diffInDays} days`;
 };
+
+/**
+ * Toggle a deal in favorites
+ * @param {Object} deal
+ */
+const toggleFavorite = (deal) => {
+  console.log('Toggling favorite:', deal);
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+  const existingIndex = favorites.findIndex(fav => fav.uuid === deal.uuid);
+  if (existingIndex > -1) {
+    // Remove from favorites
+    favorites.splice(existingIndex, 1);
+  } else {
+    // Add to favorites
+    favorites.push(deal);
+  }
+
+  // Update local storage
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+
+  // Refresh deals display
+  renderDeals(currentDeals, currentPagination);
+};
+
+
+//Ajout d'un gestionnaire d'événement pour ajouter des favoris
+document.getElementById('filter-favorites').addEventListener('click', () => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  renderDeals(favorites); // Affiche uniquement les favoris
+});
+
+//Stocker les deals actuels dans le local storage
+const processSales = (sales) => {
+  localStorage.setItem('currentDeals', JSON.stringify(sales)); // Stocke les ventes actuelles
+  renderDeals(sales); // Affiche les ventes
+};
+
