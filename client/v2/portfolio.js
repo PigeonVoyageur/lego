@@ -36,7 +36,10 @@ const filterMostCommentedButton = document.querySelector('#filter-most-commented
 const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
 const selectSortDate = document.querySelector('#sort-select');
+<<<<<<< HEAD
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
+=======
+>>>>>>> f985096 (Jusque SortByDate)
 
 /**
  * Set global value
@@ -80,7 +83,11 @@ const fetchDeals = async (page = 1, size = 6) => {
 const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
+<<<<<<< HEAD
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+=======
+
+>>>>>>> f985096 (Jusque SortByDate)
    // Fonction pour formater la date
    const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000); // Conversion du timestamp en millisecondes
@@ -258,6 +265,7 @@ filterMostCommentedButton.addEventListener('click', async ()=>{
     const sortedDeals = sortByDate(deals.result, selectedOrder === 'date-asc' ? 'asc' : 'desc');
     render(sortedDeals, currentPagination);
   }
+<<<<<<< HEAD
  });
 
  /**
@@ -514,3 +522,6 @@ const processSales = (sales) => {
   renderDeals(sales); // Affiche les ventes
 };
 
+=======
+ });
+>>>>>>> f985096 (Jusque SortByDate)
