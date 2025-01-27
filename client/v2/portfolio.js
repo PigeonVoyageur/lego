@@ -406,9 +406,13 @@ const displayPriceIndicators = (sales) => {
   const p50Price = calcilatePercentile(sales, 50);
   console.log('Indicators:', { averagePrice, p5Price, p25Price, p50Price, salesLength: sales.length });
 <<<<<<< HEAD
+<<<<<<< HEAD
   updateLifetimeValue(sales);
 =======
 >>>>>>> 784814f (Feature 9 done)
+=======
+  updateLifetimeValue(sales);
+>>>>>>> f85b090 (Feature 10 done)
   // Update the DOM elements
   document.querySelector('#indicators #nbSales').textContent = sales.length;
   document.querySelector('#indicators #avg').textContent = sales.length ? `${averagePrice}€` : 'N/A';
@@ -436,6 +440,9 @@ inputLegoSetId.addEventListener('input', async (event) => {
   }
   fetchSalesAndDisplayIndicators(enteredId);
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f85b090 (Feature 10 done)
 });
 
 /**
@@ -494,6 +501,7 @@ const calculateLifetimeValueToday = (sales) => {
   const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
   return `${diffInDays} days`;
+<<<<<<< HEAD
 };
 
 /**
@@ -539,3 +547,6 @@ const processSales = (sales) => {
 =======
 });
 >>>>>>> 784814f (Feature 9 done)
+=======
+};
+>>>>>>> f85b090 (Feature 10 done)
