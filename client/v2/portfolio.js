@@ -88,10 +88,14 @@ const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
 <<<<<<< HEAD
+<<<<<<< HEAD
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 =======
 
 >>>>>>> f985096 (Jusque SortByDate)
+=======
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+>>>>>>> 8971321 (Feature 14 done)
    // Fonction pour formater la date
    const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000); // Conversion du timestamp en millisecondes
@@ -502,6 +506,9 @@ const calculateLifetimeValueToday = (sales) => {
 
   return `${diffInDays} days`;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 8971321 (Feature 14 done)
 };
 
 /**
@@ -541,6 +548,7 @@ const processSales = (sales) => {
   renderDeals(sales); // Affiche les ventes
 };
 
+<<<<<<< HEAD
 =======
  });
 >>>>>>> f985096 (Jusque SortByDate)
@@ -550,3 +558,5 @@ const processSales = (sales) => {
 =======
 };
 >>>>>>> f85b090 (Feature 10 done)
+=======
+>>>>>>> 8971321 (Feature 14 done)
