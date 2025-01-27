@@ -452,11 +452,7 @@ console.log("List of very old items:", oldItemsList);
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
-
 const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
-
-
-
 console.log("Specific item:", specificItem);
 
 
