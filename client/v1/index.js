@@ -457,7 +457,9 @@ console.log("List of very old items:", oldItemsList);
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
+const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
 
+<<<<<<< HEAD
 const specificItem = VINTED.find(item => item.uuid === 'f2c5377c-84f9-571d-8712-98902dcbb913');
 <<<<<<< HEAD
 
@@ -467,6 +469,9 @@ console.log("Specific item:", specificItem);
 
 console.log("Specific item:", specificItem);
 
+=======
+console.log("Specific item:", specificItem);
+>>>>>>> 251ca65 (TODO 12-13)
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
