@@ -36,14 +36,8 @@ const filterMostCommentedButton = document.querySelector('#filter-most-commented
 const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
 const selectSortDate = document.querySelector('#sort-select');
-<<<<<<< HEAD
-<<<<<<< HEAD
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
-=======
->>>>>>> f985096 (Jusque SortByDate)
-=======
-const inputLegoSetId = document.querySelector('#lego-set-id-select');
->>>>>>> 784814f (Feature 9 done)
+
 
 /**
  * Set global value
@@ -87,15 +81,8 @@ const fetchDeals = async (page = 1, size = 6) => {
 const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
-<<<<<<< HEAD
-<<<<<<< HEAD
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-=======
 
->>>>>>> f985096 (Jusque SortByDate)
-=======
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
->>>>>>> 8971321 (Feature 14 done)
    // Fonction pour formater la date
    const formatDate = (timestamp) => {
     const date = new Date(timestamp * 1000); // Conversion du timestamp en millisecondes
@@ -273,10 +260,6 @@ filterMostCommentedButton.addEventListener('click', async ()=>{
     const sortedDeals = sortByDate(deals.result, selectedOrder === 'date-asc' ? 'asc' : 'desc');
     render(sortedDeals, currentPagination);
   }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 784814f (Feature 9 done)
  });
 
  /**
@@ -409,14 +392,8 @@ const displayPriceIndicators = (sales) => {
   const p25Price = calcilatePercentile(sales, 25);
   const p50Price = calcilatePercentile(sales, 50);
   console.log('Indicators:', { averagePrice, p5Price, p25Price, p50Price, salesLength: sales.length });
-<<<<<<< HEAD
-<<<<<<< HEAD
+
   updateLifetimeValue(sales);
-=======
->>>>>>> 784814f (Feature 9 done)
-=======
-  updateLifetimeValue(sales);
->>>>>>> f85b090 (Feature 10 done)
   // Update the DOM elements
   document.querySelector('#indicators #nbSales').textContent = sales.length;
   document.querySelector('#indicators #avg').textContent = sales.length ? `${averagePrice}€` : 'N/A';
@@ -443,10 +420,6 @@ inputLegoSetId.addEventListener('input', async (event) => {
     return;
   }
   fetchSalesAndDisplayIndicators(enteredId);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> f85b090 (Feature 10 done)
 });
 
 /**
@@ -505,10 +478,6 @@ const calculateLifetimeValueToday = (sales) => {
   const diffInDays = Math.ceil(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
   return `${diffInDays} days`;
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 8971321 (Feature 14 done)
 };
 
 /**
@@ -548,15 +517,3 @@ const processSales = (sales) => {
   renderDeals(sales); // Affiche les ventes
 };
 
-<<<<<<< HEAD
-=======
- });
->>>>>>> f985096 (Jusque SortByDate)
-=======
-});
->>>>>>> 784814f (Feature 9 done)
-=======
-};
->>>>>>> f85b090 (Feature 10 done)
-=======
->>>>>>> 8971321 (Feature 14 done)
