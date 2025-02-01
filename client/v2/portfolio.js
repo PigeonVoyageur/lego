@@ -83,29 +83,30 @@ const renderDeals = deals => {
   const div = document.createElement('div');
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-   // Fonction pour formater la date
-   const formatDate = (timestamp) => {
-    const date = new Date(timestamp * 1000); // Conversion du timestamp en millisecondes
-    return date.toLocaleDateString(); // Formatage de la date en fonction de la locale (JJ/MM/AAAA)
+  // Fonction pour formater la date
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleDateString();
   };
 
   const template = deals
     .map(deal => {
       const isFavorite = favorites.some(fav => fav.uuid === deal.uuid);
       return `
-      <div class="deal" id=${deal.uuid}>
-        <button class="favorite-btn" data-uuid="${deal.uuid}" aria-label="Add to favorites">
-          ${isFavorite ? '❤️' : '🤍'}
-        </button>
-        <span>${deal.id}</span>
-        <a href="${deal.link}">${deal.title}</a>
-        <span>${deal.price +'€'}</span>
-        <span>${deal.discount ? deal.discount.toFixed(2) + '%' : 'N/A'}</span>
-        <span>${deal.comments ? deal.comments + ' comments' : '0 comment'}</span>
-        <span>${deal.temperature ? deal.temperature + '°C' : 'N/A'}</span>
-        <span>Published: ${deal.published ? formatDate(deal.published) : 'N/A'}</span> <!-- Affichage de la date formatée -->
-      </div>
-    `;
+        <div class="deal" id=${deal.uuid}>
+          <img src="${deal.photo}" alt="${deal.title}" class="deal-image">
+          <button class="favorite-btn" data-uuid="${deal.uuid}" aria-label="Add to favorites">
+            ${isFavorite ? '❤️' : '🤍'}
+          </button>
+          <span class="deal-id">${deal.id}</span>
+          <a href="${deal.link}" class="deal-title">${deal.title}</a>
+          <span class="deal-price">${deal.price}€</span>
+          <span class="deal-discount">${deal.discount ? deal.discount.toFixed(2) + '%' : 'N/A'}</span>
+          <span class="deal-comments">${deal.comments ? deal.comments + ' comments' : '0 comment'}</span>
+          <span class="deal-temperature">${deal.temperature ? deal.temperature + '°C' : 'N/A'}</span>
+          <span class="deal-published">Published: ${deal.published ? formatDate(deal.published) : 'N/A'}</span>
+        </div>
+      `;
     })
     .join('');
 
@@ -113,12 +114,14 @@ const renderDeals = deals => {
   fragment.appendChild(div);
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
+  console.log(document.querySelector("#deals").innerHTML);
 
+  // Ajout des écouteurs d'événements pour les boutons de favoris
   document.querySelectorAll('.favorite-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const uuid = e.target.dataset.uuid;
-    toggleFavorite(deals.find(deal => deal.uuid === uuid));
-  });
+      toggleFavorite(deals.find(deal => deal.uuid === uuid));
+    });
   });
 };
 
