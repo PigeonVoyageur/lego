@@ -35,7 +35,7 @@ const filterDiscountButton = document.querySelector('#filter-discount');
 const filterMostCommentedButton = document.querySelector('#filter-most-commented');
 const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
-const selectSortDate = document.querySelector('#sort-select');
+const selectSortDate = document.querySelector('#sort-select-date');
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
 
 
@@ -376,13 +376,13 @@ const calculateAveragePrice = (sales) => {
  * @param {Number} percentile - Valeur du percentile (5, 25, 50)
  * @return {Number} - Valeur du percentile
  */
-const calcilatePercentile = (sales, percentile) => {
+const calculatePercentile = (sales, percentile) => {
   if (sales.length === 0) {
     return 0;
   }
-  const sortedPrices = sales.map(sale => sale.price).sort((a, b) => a - b);
-  const index = Math.ceil(percentile / 100 * sortedPrices.length);
-  return sortedPrices[index - 1];
+  const sortedPrices = sales.map(sale => parseFloat(sale.price)).sort((a, b) => a - b);
+  const index = Math.floor((percentile / 100) * sortedPrices.length);
+  return sortedPrices[index] || 0;
 }
 
 /** 
@@ -391,9 +391,9 @@ const calcilatePercentile = (sales, percentile) => {
  */
 const displayPriceIndicators = (sales) => {
   const averagePrice = calculateAveragePrice(sales);
-  const p5Price = calcilatePercentile(sales, 5);
-  const p25Price = calcilatePercentile(sales, 25);
-  const p50Price = calcilatePercentile(sales, 50);
+  const p5Price = calculatePercentile(sales, 5);
+  const p25Price = calculatePercentile(sales, 25);
+  const p50Price = calculatePercentile(sales, 50);
   console.log('Indicators:', { averagePrice, p5Price, p25Price, p50Price, salesLength: sales.length });
 
   updateLifetimeValue(sales);
