@@ -35,7 +35,7 @@ const filterDiscountButton = document.querySelector('#filter-discount');
 const filterMostCommentedButton = document.querySelector('#filter-most-commented');
 const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
-const selectSortDate = document.querySelector('#sort-select-date');
+const selectSortDate = document.querySelector('#sort-select');
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
 
 
@@ -301,33 +301,46 @@ filterMostCommentedButton.addEventListener('click', async ()=>{
   * Render Vinted Sales for a given LEGO set id
   * @param  {Array} sales - List of sales
   */
- const renderSales = (sales) => {
-  // Assurez-vous d'accéder à sales.result, car sales est un objet avec une propriété 'result'
-  const salesArray = sales.result || [];
+ const renderSales = (salesData) => {
+  // Vérifier si salesData.result existe, sinon utiliser un tableau vide
+  const salesArray = salesData.result || [];
 
-  console.log('Sales to render:', salesArray); // Vérifiez ce qui est passé à la fonction
+  console.log('Sales to render:', salesArray); // Vérification des données reçues
 
-  const sectionSales = document.querySelector('#sales');
+  const sectionSales = document.querySelector('#vinted-sales-container');
+  if (!sectionSales) {
+      console.error("Erreur : Élément #vinted-sales-container introuvable.");
+      return;
+  }
+
+  // Nettoyer le conteneur avant d'ajouter de nouvelles ventes
+  sectionSales.innerHTML = '<h2></h2>';
+
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div'); 
+  div.classList.add("sales-grid"); // Ajout d'une classe pour un affichage en grille
 
   if (salesArray.length === 0) {
-    div.innerHTML = '<p>No sales available for this set.</p>';
+      div.innerHTML = '<p>Aucune vente disponible pour ce set.</p>';
   } else {
-    const template = salesArray.map(sale => `
-      <div class="sale">
-          <h3><a href="${sale.link}" target="_blank">${sale.title}</a></h3>
-          <p>Price: ${sale.price}€</p>
-          <span>Published: ${sale.published}</span> <!-- Affichage de la date formatée -->
-      </div>
-    `).join('');
-    div.innerHTML = template;
+      const template = salesArray.map(sale => `
+          <div class="sale">
+              <img src="${sale.image ? sale.image : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrhIpYwqhQ6xdszbszIfFvukl__ZnyezImJA&s'}" alt="${sale.title || 'Aucune image'}">
+              <h3><a href="${sale.link}" target="_blank">${sale.title}</a></h3>
+              <p>Prix: ${sale.price ? sale.price + '€' : 'Non précisé'}</p>
+              <span>Publié: ${new Date(sale.published).toLocaleDateString()}</span>
+          </div>
+      `).join('');
+
+      div.innerHTML = template;
   }
 
   fragment.appendChild(div);
-  sectionSales.innerHTML = '<h2>Vinted Sales</h2>';
   sectionSales.appendChild(fragment);
 };
+
+
+
 
 
 

@@ -113,6 +113,59 @@ footer {
   .deal a:hover {
     text-decoration: underline;
   }
+  #sales {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+}
+
+.sale {
+    width: calc(33.333% - 20px); /* Même mise en page que les deals */
+    background-color: var(--lego-white);
+    border: 2px solid var(--lego-blue);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1200px) {
+    .sale {
+        width: calc(50% - 20px); /* 2 colonnes sur écran moyen */
+    }
+}
+
+@media (max-width: 768px) {
+    .sale {
+        width: 100%; /* 1 colonne sur petits écrans */
+    }
+}
+
+.sale:hover {
+    transform: translate(-5px,-5px);
+}
+
+.sale img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: var(--lego-light-grey);
+}
+
+.sale a {
+    color: var(--lego-blue);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.sale a:hover {
+    text-decoration: underline;
+}
+
   
   select, button {
     margin: 10px 0;
@@ -136,7 +189,13 @@ footer {
     padding: 15px;
     border-radius: 8px;
     margin-top: 20px;
+    margin-bottom: 20px; /* Ajout d'un margin-bottom pour espacer le bas */
+    box-sizing: border-box;
+    position: relative; /* Relatif pour ajuster l'élément sans qu'il dépasse */
+    overflow: hidden; /* S'assure que tout débordement de contenu est masqué */
   }
+  
+  
   
   .favorite-btn {
     background: none;
