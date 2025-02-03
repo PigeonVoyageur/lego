@@ -1,6 +1,8 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
+
+
 /**
  * Parse webpage data response
  * @param  {String} data - html response
