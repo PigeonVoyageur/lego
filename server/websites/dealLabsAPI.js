@@ -1,54 +1,58 @@
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
-const fs = require('fs');
+import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
+import fs from 'fs';
 
-const URL = 'https://www.dealabs.com/groupe/lego';
-
-async function scrapeLegoDeals() {
-    try {
-        const response = await fetch(URL, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Referer': 'https://www.google.com/',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
-            }
-        });
-        
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        
-        const body = await response.text();
-        const $ = cheerio.load(body);
-        let deals = [];
-        
-        $('.threadListCard').each((index, element) => {
-            const title = $(element).find('.thread-title a.js-thread-title').text().trim();
-            if (!title.toLowerCase().includes('lego')) return;
-
-            const link = $(element).find('.thread-title a.js-thread-title').attr('href');
-            const fullLink = link ? link : "Lien non disponible";
-
-            const priceText = $(element).find('.thread-price').text().trim();
-            const price = priceText ? parseFloat(priceText.replace(/[^0-9,.]/g, '').replace(',', '.')) : null;
-
-            const merchant = $(element).find('.threadListCard-body .color--text-AccentBrand').text().trim() || "Marchand inconnu";
-
-            const image = $(element).find('.threadListCard-image').attr('src') || "Image non disponible";
-
-            const author = $(element).find('.overflow--ellipsis.size--all-xs.size--fromW3-s').text().trim() || "Auteur inconnu";
-
-            const temperature = $(element).find('span.overflow--wrap-off').text().trim() || "Température inconnue";
-
-            deals.push({ title, price, link: fullLink, merchant, image, author, temperature });
-        });
-        
-        fs.writeFileSync('lego_deals.json', JSON.stringify(deals, null, 2));
-        console.log('Scraping terminé. Données sauvegardées dans lego_deals.json');
-    } catch (error) {
-        console.error('Erreur lors du scraping :', error);
-    }
+// Fonction pour extraire un ID LEGO (5 chiffres) depuis un titre
+function SearchIdinTitle(title) {
+    const match = title.match(/\b\d{5}\b/); // Cherche un nombre de 5 chiffres
+    return match ? match[0] : null; // Retourne l'ID ou null si non trouvé
 }
 
-scrapeLegoDeals();
+async function getLegoDeals() {
+    const url = "https://www.dealabs.com/groupe/lego";
+
+    const response = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    const body = await response.text();
+
+    const $ = cheerio.load(body);
+    const deals = [];
+
+    $('div[data-vue2]').each((index, element) => {
+        const jsonData = $(element).attr('data-vue2');
+        if (jsonData) {
+            try {
+                const deal = JSON.parse(jsonData);
+                const thread = deal.props.thread;
+
+                deals.push({
+                    title: thread.title,
+                    price: thread.price,
+                    nextBestPrice: thread.nextBestPrice,
+                    discount: thread.nextBestPrice ? parseInt(((1 - thread.price / thread.nextBestPrice) * 100).toFixed(2),10) : "N/A",
+                    temperature: thread.temperature,
+                    merchant: thread.merchant.merchantName,
+                    link: thread.link,
+                    image: `https://static-pepper.dealabs.com/threads/raw/${thread.mainImage.uid}`,
+                    publication: thread.publishedAt,
+                    comments: thread.commentCount,
+                    id: SearchIdinTitle(thread.title) // Extraction de l'ID LEGO depuis le titre
+                });
+            } catch (error) {
+                console.error("Erreur de parsing JSON:", error);
+            }
+        }
+    });
+
+    // Écriture dans le fichier JSON
+    fs.writeFile("lego_deals.json", JSON.stringify(deals, null, 4), (err) => {
+        if (err) {
+            console.error("Erreur lors de l'écriture du fichier:", err);
+        } else {
+            console.log("✅ Données sauvegardées dans lego_deals.json !");
+        }
+    });
+}
+
+getLegoDeals();
