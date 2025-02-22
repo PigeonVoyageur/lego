@@ -4,10 +4,14 @@
   "description": "First bricks for profitability",
   "main": "index.js",
   "repository": "git@github.com:92bondstreet/lego.git",
+  "type": "module",
   "dependencies": {
     "cheerio": "^1.0.0",
+    "express": "^4.21.2",
     "node-fetch": "^2.7.0",
     "parse-domain": "^8.2.2",
+    "playwright": "^1.50.1",
+    "puppeteer": "^24.2.1",
     "require-all": "^3.0.0",
     "uuid": "^11.0.5"
   },
