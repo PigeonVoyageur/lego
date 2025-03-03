@@ -81,7 +81,7 @@ async function getVintedDeals(legosetid) {
             id: item.id,
             title: item.title,
             price: `${item.price.amount} ${item.price.currency_code}`,
-            published: formatDate(item.created_at_ts),
+            published: (item.updatedAt),
             seller: {
                 username: item.user.login,
                 profile_url: item.user.profile_url
