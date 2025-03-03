@@ -37,6 +37,7 @@ const filterHotDealsButton = document.querySelector('#filter-hot-deals');
 const selectSort = document.querySelector('#sort-select');
 const selectSortDate = document.querySelector('#sort-select');
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
+const displayFavoritesButton = document.querySelector('#display-favorites');
 
 
 /**
@@ -78,47 +79,35 @@ const fetchDeals = async (page = 1, size = 6) => {
  * Render list of deals
  * @param  {Array} deals
  */
+
 const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-  // Fonction pour formater la date
-  const formatDate = (timestamp) => {
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleDateString();
-  };
+  const formatDate = timestamp => new Date(timestamp * 1000).toLocaleDateString();
 
-  const template = deals
-    .map(deal => {
-      const isFavorite = favorites.some(fav => fav.uuid === deal.uuid);
-      return `
-        <div class="deal" id=${deal.uuid}>
-          <img src="${deal.photo}" alt="${deal.title}" class="deal-image">
-          <button class="favorite-btn" data-uuid="${deal.uuid}" aria-label="Add to favorites">
-            ${isFavorite ? '❤️' : '🤍'}
-          </button>
-          <span class="deal-id">${deal.id}</span>
-          <a href="${deal.link}" class="deal-title">${deal.title}</a>
-          <span class="deal-price">${deal.price}€</span>
-          <span class="deal-discount">${deal.discount ? deal.discount.toFixed(2) + '%' : 'N/A'}</span>
-          <span class="deal-comments">${deal.comments ? deal.comments + ' comments' : '0 comment'}</span>
-          <span class="deal-temperature">${deal.temperature ? deal.temperature + '°C' : 'N/A'}</span>
-          <span class="deal-published">Published: ${deal.published ? formatDate(deal.published) : 'N/A'}</span>
-        </div>
-      `;
-    })
-    .join('');
+  div.innerHTML = deals.map(deal => {
+    const isFavorite = favorites.some(fav => fav.uuid === deal.uuid);
+    return `
+      <div class="deal" id="${deal.uuid}">
+        <img src="${deal.photo}" alt="${deal.title}">
+        <button class="favorite-btn" data-uuid="${deal.uuid}">${isFavorite ? '❤️' : '🤍'}</button>
+        <a href="${deal.link}" target="_blank">${deal.title}</a>
+        <span>${deal.price}€</span>
+        <span>${deal.discount ? deal.discount.toFixed(2) + '%' : 'N/A'}</span>
+        <span>${deal.comments || 0} comments</span>
+        <span>Published: ${deal.published ? formatDate(deal.published) : 'N/A'}</span>
+      </div>
+    `;
+  }).join('');
 
-  div.innerHTML = template;
   fragment.appendChild(div);
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
-  console.log(document.querySelector("#deals").innerHTML);
 
-  // Ajout des écouteurs d'événements pour les boutons de favoris
   document.querySelectorAll('.favorite-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', e => {
       const uuid = e.target.dataset.uuid;
       toggleFavorite(deals.find(deal => deal.uuid === uuid));
     });
@@ -531,5 +520,18 @@ document.getElementById('filter-favorites').addEventListener('click', () => {
 const processSales = (sales) => {
   localStorage.setItem('currentDeals', JSON.stringify(sales)); // Stocke les ventes actuelles
   renderDeals(sales); // Affiche les ventes
+};
+
+displayFavoritesButton.addEventListener('click', () => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  console.log('Favorites:', favorites);
+  render(favorites, { count: favorites.length, currentPage: 1, pageCount: 1 });
+});
+
+// Mettre à jour la classe CSS pour rendre la grille
+const applyGridLayout = () => {
+  document.querySelectorAll('.deal, .sale').forEach(element => {
+    element.classList.add('grid-item');
+  });
 };
 
