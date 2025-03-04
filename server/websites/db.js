@@ -21,7 +21,7 @@ async function connectToMongoDB() {
 
     //await findBestDiscountDeals(db);
     //await findMostCommentedDeals(db);
-    await findDealsSortedByPrice(db);
+    //await findDealsSortedByPrice(db);
     //await findDealsSortedByDate(db);
     await findSalesByLegoSetId(db, '75403');
     //await findSalesScrapedLessThanThreeWeeks(db);
@@ -160,8 +160,17 @@ async function findDealsSortedByDate(db) {
 
 async function findSalesByLegoSetId(db, legoSetId) {
   const collection = db.collection('vintedSales');
-  const sales = await collection.find({ id: parseInt(legoSetId) }).toArray();
-  console.log(`🔍 Ventes pour le set LEGO ${legoSetId}:`, sales);
+  const sales = await collection.find().toArray();
+  const filteredSales = sales.filter((sale) => {
+    const extractedId = SearchIdinTitle(sale.title);
+    return extractedId === legoSetId;
+  });
+  console.log(`🔍 Ventes pour le set LEGO ${legoSetId}:`, filteredSales);
+}
+// Fonction pour extraire un ID LEGO (5 chiffres) depuis un titre
+function SearchIdinTitle(title) {
+  const match = title.match(/\b\d{5}\b/);
+  return match ? match[0] : null;
 }
 
 async function findSalesScrapedLessThanThreeWeeks(db) {
