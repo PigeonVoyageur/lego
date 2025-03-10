@@ -61,7 +61,7 @@ With [inception](https://github.com/92bondstreet/inception?tab=readme-ov-file#%E
 =======
 | 4 | [Scrape data with Node.js](./workshops/4-scrape-node.md) | Feb 2025
 | 5 | [Save data in a Database with MongoDB](./workshops/5-store-mongodb.md) | Mar 2024
-| n | Build an api with Express to request data | Mar 2025
+| 6 | [Build an api with Express to request data](./workshops/6-api-express.md) | Mar 2025
 | n | Deploy in production with Vercel | Mar 2025
 | n | Design an effective experience | Mar 2025
 >>>>>>> 827058879dbe9eef99dd5888839ad8c0c2738884
