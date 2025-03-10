@@ -91,8 +91,6 @@ async function getVintedDeals(legosetid) {
             favorites_count: item.favourite_count || 0,
             views: item.view_count || 0
         }));
-
-        console.log(deals);
         fs.writeFileSync("vinted_sales.json", JSON.stringify(deals, null, 4));
         console.log("✅ Données LEGO sauvegardées !");
     } catch (error) {
