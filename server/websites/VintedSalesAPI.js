@@ -48,7 +48,8 @@ function formatDate(timestamp) {
  * Scrappe automatiquement les annonces LEGO
  */
 async function getVintedDeals(legosetid) {
-    const url = `https://www.vinted.fr/api/v2/catalog/items?page=1&per_page=96&search_text=${legosetid}&brand_ids[]=89162&status_ids=1&order=newest_first`;
+    fs.writeFileSync("vinted_sales.json", JSON.stringify([], null, 4));
+    const url = `https://www.vinted.fr/api/v2/catalog/items?page=1&per_page=96&search_text=${legosetid}&brand_ids[]=89162&catalog_item_condition_ids=1,2&order=newest_first`;
     const cookies = await getCookies();
 
     try {
@@ -81,7 +82,7 @@ async function getVintedDeals(legosetid) {
             id: item.id,
             title: item.title,
             price: `${item.price.amount} ${item.price.currency_code}`,
-            published: (item.updatedAt),
+            //published: (item.updatedAt_ts),
             seller: {
                 username: item.user.login,
                 profile_url: item.user.profile_url
@@ -89,13 +90,18 @@ async function getVintedDeals(legosetid) {
             link: `https://www.vinted.fr${item.path}`,
             image: item.photo?.url || "Pas d'image",
             favorites_count: item.favourite_count || 0,
-            views: item.view_count || 0
+            id_lego: SearchIdinTitle(item.title) // Extraction de l'ID LEGO depuis le titre
         }));
         fs.writeFileSync("vinted_sales.json", JSON.stringify(deals, null, 4));
         console.log("✅ Données LEGO sauvegardées !");
     } catch (error) {
         console.error("❌ Erreur :", error.message);
     }
+}
+
+function SearchIdinTitle(title) {
+    const match = title.match(/\b\d{5}\b/); // Cherche un nombre de 5 chiffres
+    return match ? match[0] : null; // Retourne l'ID ou null si non trouvé
 }
 
 const legosetid = process.argv[2] || "42182";

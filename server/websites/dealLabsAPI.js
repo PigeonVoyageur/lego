@@ -30,7 +30,7 @@ async function getLegoDeals() {
                     title: thread.title,
                     price: thread.price,
                     nextBestPrice: thread.nextBestPrice,
-                    discount: thread.nextBestPrice ? parseInt(((1 - thread.price / thread.nextBestPrice) * 100).toFixed(2),10) : "N/A",
+                    discount: thread.nextBestPrice ? parseInt(((1 - thread.price / thread.nextBestPrice) * 100).toFixed(2),10) : 0,
                     temperature: thread.temperature,
                     merchant: thread.merchant.merchantName,
                     link: thread.link,

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import fs from 'fs/promises';
 
 dotenv.config({ path: './.env' });
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Fix SSL Windows
+//process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Fix SSL Windows
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME;
