@@ -1,11 +1,11 @@
-import cors from 'cors';
-import express from 'express';
-import helmet from 'helmet';
-import bodyParser from 'body-parser';
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
+import bodyParser from "body-parser";
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
 
-dotenv.config({ path: './websites/.env' });
+dotenv.config({ path: "./.env" });
 
 const PORT = 8092;
 const app = express();
@@ -13,150 +13,90 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(helmet());
+app.options("*", cors());
 
-app.options('*', cors());
-
-// Connexion à MongoDB
+// 🔹 Variables d'environnement
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME;
 
-let db;
-let dealsCollection;
-let salesCollection;
-
-async function connectToMongoDB() {
+// 🔹 Middleware pour gérer la connexion MongoDB à chaque requête
+async function withMongoDB(callback, res) {
+  const client = new MongoClient(MONGODB_URI);
   try {
-    const client = await MongoClient.connect(MONGODB_URI, {});
-    console.log('✅ Connected to MongoDB');
-    
-    db = client.db(MONGODB_DB_NAME);
-    dealsCollection = db.collection('deals');
-    salesCollection = db.collection('vintedSales');
-  } catch (err) {
-    console.error('❌ MongoDB connection error:', err);
+    await client.connect();
+    const db = client.db(MONGODB_DB_NAME);
+    return await callback(db);
+  } catch (error) {
+    console.error("❌ MongoDB error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  } finally {
+    await client.close();
   }
-  
-
-  
 }
 
-// Connecter à MongoDB avant de démarrer le serveur
-connectToMongoDB();
-
-// Route d'accueil
-app.get('/', (req, res) => {
+// ✅ Route d'accueil
+app.get("/", (req, res) => {
   res.send({ ack: true });
 });
 
-app.get('/deals/search', async (req, res) => {
-  try {
-    // Paramètres de requête avec valeurs par défaut
+// ✅ Recherche de deals avec filtres et tri
+app.get("/deals/search", async (req, res) => {
+  await withMongoDB(async (db) => {
     const { limit = 12, price, date, filterBy, temperature, comments } = req.query;
-
-    // Conversion du paramètre limit en entier
     const limitInt = parseInt(limit, 10);
 
-    // Création du filtre MongoDB de base
     let filter = {};
+    let sortCriteria = {};
 
-    // Déterminer l'ordre de tri
-    let sortCriteria = { price: 1 }; // Par défaut : tri croissant par prix
+    // 🔍 Application des filtres
+    if (price) filter.price = { $lte: parseFloat(price) }; // Prix max
+    if (date) filter.published = { $gte: new Date(date) }; // Date minimum
 
-    if (filterBy === 'best-discount') {
-      sortCriteria = { discount: -1 }; // Tri par réduction décroissante
-    } else if (price === 'asc') {
-      sortCriteria = { price: 1 }; // Tri croissant par prix
-    } else if (price === 'desc') {
-      sortCriteria = { price: -1 }; // Tri décroissant par prix
-    } else if (date === 'asc') {
-      sortCriteria = { published: 1 }; // Tri croissant par date
-    } else if (date === 'desc') {
-      sortCriteria = { published: -1 }; // Tri décroissant par date
-    } else if (temperature === 'asc') {
-      sortCriteria = { temperature: 1 }; // Tri croissant par température
-    } else if (temperature === 'desc') {
-      sortCriteria = { temperature: -1 }; // Tri décroissant par température
-    } else if (comments === 'asc') {
-      sortCriteria = { comments: 1 }; // Tri croissant par nombre de commentaires
-    } else if (comments === 'desc') {
-      sortCriteria = { comments: -1 }; // Tri décroissant par nombre de commentaires
-    }
+    // 🔍 Application du tri
+    if (filterBy === "best-discount") sortCriteria.discount = -1;
+    else if (filterBy === "most-commented") sortCriteria.comments = -1;
+    else if (filterBy === "cheapest") sortCriteria.price = 1;
+    else if (temperature === "asc") sortCriteria.temperature = 1;
+    else if (temperature === "desc") sortCriteria.temperature = -1;
+    else if (comments === "asc") sortCriteria.comments = 1;
+    else if (comments === "desc") sortCriteria.comments = -1;
 
-    // Recherche de deals avec tri appliqué
-    const deals = await dealsCollection.find(filter).sort(sortCriteria).limit(limitInt).toArray();
+    const deals = await db.collection("deals").find(filter).sort(sortCriteria).limit(limitInt).toArray();
+    const total = await db.collection("deals").countDocuments(filter);
 
-    // Récupérer le total des résultats (sans limite)
-    const total = await dealsCollection.countDocuments(filter);
-
-    // Réponse JSON
-    res.json({
-      limit: limitInt,
-      total,
-      results: deals,
-    });
-
-  } catch (error) {
-    console.error('❌ Error fetching deals:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    res.json({ limit: limitInt, total, results: deals });
+  }, res);
 });
 
-
-
-
-// 🔍 Route pour rechercher un deal par ID (champ "id", pas "_id")
-app.get('/deals/:id', async (req, res) => {
-  try {
+// ✅ Recherche d'un deal par ID
+app.get("/deals/:id", async (req, res) => {
+  await withMongoDB(async (db) => {
     const { id } = req.params;
-    const deal = await dealsCollection.findOne({ id: id.toString() });
+    const deal = await db.collection("deals").findOne({ id: id.toString() });
 
-    if (!deal) {
-      return res.status(404).json({ error: 'Deal not found' });
-    }
+    if (!deal) return res.status(404).json({ error: "Deal not found" });
 
     res.json(deal);
-  } catch (error) {
-    console.error('❌ Error fetching deal:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+  }, res);
 });
 
-app.get('/sales/search', async (req, res) => {
-  try {
-    // 1️⃣ Extraction des paramètres de requête avec valeurs par défaut
+// ✅ Recherche de ventes avec filtrage
+app.get("/sales/search", async (req, res) => {
+  await withMongoDB(async (db) => {
     const { limit = 12, legoSetId } = req.query;
     const limitInt = parseInt(limit, 10);
 
-    // 2️⃣ Création du filtre MongoDB
     let filter = {};
-    if (legoSetId) {
-      filter.id_lego = legoSetId;
-    }
+    if (legoSetId) filter.id_lego = legoSetId;
 
-    // 3️⃣ Recherche dans la base avec filtre et tri par date décroissante
-    let salesCursor = salesCollection.find(filter).sort({ published: -1 }).limit(limitInt);
-    const sales = await salesCursor.toArray();
+    const sales = await db.collection("vintedSales").find(filter).sort({ published: -1 }).limit(limitInt).toArray();
+    const total = await db.collection("vintedSales").countDocuments(filter);
 
-    // 4️⃣ Récupération du total des résultats correspondant au filtre
-    const total = await salesCollection.countDocuments(filter);
-
-    // 5️⃣ Réponse JSON formatée
-    res.json({
-      limit: limitInt,
-      total,
-      results: sales,
-    });
-
-  } catch (error) {
-    console.error('❌ Error fetching sales:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+    res.json({ limit: limitInt, total, results: sales });
+  }, res);
 });
 
-
-
-app.listen(PORT, () => {
-  console.log(`📡 Running on port ${PORT}`);
-});
+// 🚀 Démarrage du serveur
+app.listen(PORT, () => console.log(`📡 Server running on port ${PORT}`));
 
 export default app;
