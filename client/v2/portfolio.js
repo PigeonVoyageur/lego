@@ -1,4 +1,4 @@
-// Invoking strict mode https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode#invoking_strict_mode
+ // Invoking strict mode https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Strict_mode#invoking_strict_mode
 'use strict';
 
 /**
@@ -38,6 +38,7 @@ const selectSort = document.querySelector('#sort-select');
 const selectSortDate = document.querySelector('#sort-select');
 const inputLegoSetId = document.querySelector('#lego-set-id-select');
 const displayFavoritesButton = document.querySelector('#display-favorites');
+const SearchButton = document.querySelector('#searchButton');
 
 
 /**
@@ -169,7 +170,7 @@ const render = (deals, pagination) => {
 selectShow.addEventListener('change', async (event) => {
   const deals = await fetchDeals(currentPagination.currentPage, parseInt(event.target.value));
 
-  setCurrentDeals(deals);
+  setCurrentDeals(deals);jk
   render(currentDeals, currentPagination);
 });
 
@@ -254,110 +255,102 @@ filterMostCommentedButton.addEventListener('click', async ()=>{
   }
  });
 
- /**
-  * Fetch Vinted sales for a given LEGO set id
-  * Nouvelle fonction pour récupérer les ventes Vinted pour un set LEGO donn
-  * @param  {String} id - LEGO set id
-  * @return {Array} - List of sales
-  */
- const fetchSales = async (id) => {
-  if (!id || id.trim() === '') {
-    console.log('ID is empty');
-    return { result: [] };
+/**
+ * Fetch Vinted sales for a given LEGO set ID
+ * @param  {String} id - LEGO set ID
+ * @return {Array} - List of sales or empty array on error
+ */
+const fetchSales = async (id) => {
+  if (!id || typeof id !== 'string' || id.trim() === '') {
+    console.warn('[fetchSales] ID is invalid:', id);
+    return [];
   }
 
-  try {
-    console.log(`Fetching sales for ID: ${id}`);
-    const response = await fetch(`https://lego-api-blue.vercel.app/sales?id=${id}`);
-    const body = await response.json();
+  const endpoint = `https://lego-phi.vercel.app/sales/search?legoSetId=${encodeURIComponent(id)}`;
 
-    if (body.success !== true) {
-      console.error('API Error:', body);
-      return { result: [] };
+  try {
+    console.log(`[fetchSales] Fetching sales for ID: ${id}`);
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`[fetchSales] HTTP error: ${response.status}`);
+      return [];
     }
 
-    console.log('Fetched sales:', body.data);
-    return body.data; // This should be an object with a 'result' property
-  } catch (error) {
-    console.error('Fetch error:', error);
-    return { result: [] };
+    const body = await response.json();
+
+    // Vérification que la réponse contient bien la clé "results"
+    if (!body || !Array.isArray(body.results)) {
+      console.error('[fetchSales] Invalid response format:', body);
+      return [];
+    }
+
+    console.log('[fetchSales] Fetched sales:', body.results);
+    return body.results || [];
+  } catch (err) {
+    console.error('[fetchSales] Network or parsing error:', err);
+    return [];
   }
 };
 
 
- /**
-  * Affiche les ventes
-  * Render Vinted Sales for a given LEGO set id
-  * @param  {Array} sales - List of sales
-  */
- const renderSales = (salesData) => {
-  // Vérifier si salesData.result existe, sinon utiliser un tableau vide
-  const salesArray = salesData.result || [];
 
-  console.log('Sales to render:', salesArray); // Vérification des données reçues
+/**
+ * Affiche les ventes Vinted pour un set LEGO
+ * @param  {Array} salesData - Liste des ventes
+ */
+const renderSales = (salesData) => {
+  const salesArray = Array.isArray(salesData) ? salesData : [];
+
+  console.log('[renderSales] Sales to render:', salesArray);
 
   const sectionSales = document.querySelector('#vinted-sales-container');
   if (!sectionSales) {
-      console.error("Erreur : Élément #vinted-sales-container introuvable.");
-      return;
+    console.error("Erreur : Élément #vinted-sales-container introuvable.");
+    return;
   }
 
-  // Nettoyer le conteneur avant d'ajouter de nouvelles ventes
-  sectionSales.innerHTML = '<h2></h2>';
-
   const fragment = document.createDocumentFragment();
-  const div = document.createElement('div'); 
-  div.classList.add("sales-grid"); // Ajout d'une classe pour un affichage en grille
+  const div = document.createElement('div');
+  div.classList.add("sales-grid");
 
+  // Supprimer le message "Aucune vente" s'il existe déjà
+  let noSalesMessage = sectionSales.querySelector('.no-sales-message');
+  if (noSalesMessage) {
+    noSalesMessage.remove();
+  }
+
+  // Si aucune vente, afficher le message
   if (salesArray.length === 0) {
-      div.innerHTML = '<p>Aucune vente disponible pour ce set.</p>';
-  } else {
-      const template = salesArray.map(sale => `
-          <div class="sale">
-              <img src="${sale.image ? sale.image : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrhIpYwqhQ6xdszbszIfFvukl__ZnyezImJA&s'}" alt="${sale.title || 'Aucune image'}">
-              <h3><a href="${sale.link}" target="_blank">${sale.title}</a></h3>
-              <p>Prix: ${sale.price ? sale.price + '€' : 'Non précisé'}</p>
-              <span>Publié: ${new Date(sale.published).toLocaleDateString()}</span>
-          </div>
-      `).join('');
+    console.log('[renderSales] Aucune vente disponible pour ce set.');
 
-      div.innerHTML = template;
+    noSalesMessage = document.createElement('p');
+    noSalesMessage.classList.add('no-sales-message');
+    noSalesMessage.innerHTML = 'Aucune vente disponible pour ce set.';
+    div.appendChild(noSalesMessage);
+  } else {
+    // Si des ventes sont trouvées, les afficher
+    const template = salesArray.map(sale => `
+      <div class="sale">
+        <img src="${sale.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrhIpYwqhQ6xdszbszIfFvukl__ZnyezImJA&s'}" alt="${sale.title || 'Image indisponible'}">
+        <h3><a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a></h3>
+        <p>Prix : ${sale.price || 'Non précisé'}</p>
+        <p>Vendeur : <a href="${sale.seller?.profile_url}" target="_blank">${sale.seller?.username || 'Inconnu'}</a></p>
+        <span>Favoris : ${sale.favorites_count ?? 0}</span>
+      </div>
+    `).join('');
+
+    div.innerHTML = template;
   }
 
   fragment.appendChild(div);
   sectionSales.appendChild(fragment);
 };
-
-
-
-
-
-
-/**
- * Evenement pour afficher les ventes
- */
-selectLegoSetIds.addEventListener('change', async (event) => {
-  const selectedSetId = event.target.value;
-  if (!selectedSetId) return ; 
-  const sales = await fetchSales(selectedSetId);
-  renderSales(sales);
-});
-
-/**
- * FOnction pour rechercher les ventes dès que l'utilisateur change l'ID
- */
-inputLegoSetId.addEventListener('input', async (event) => {
-  const enteredId = event.target.value.trim(); // Récupère et nettoie l'ID entré
-  console.log(enteredId);
-  if (!enteredId) {
-    // Si l'ID est vide, efface les résultats des ventes
-    renderSales([]);
-    return;
-  }
-  const sales = await fetchSales(enteredId); // Recherche les ventes pour cet ID
-  console.log('Sales being passed to renderSales:', sales);
-  renderSales(sales); // Affiche les ventes trouvées
-});
 
 /**
  * Fonction pour calculer la moyenne des prix
@@ -418,14 +411,7 @@ const fetchSalesAndDisplayIndicators = async (id) => {
     displayPriceIndicators([]);
   }
 };
-//Ecouter l'événement sur l'input pour afficher les indicateurs
-inputLegoSetId.addEventListener('input', async (event) => {
-  const enteredId = event.target.value.trim();
-  if (!enteredId) {
-    return;
-  }
-  fetchSalesAndDisplayIndicators(enteredId);
-});
+
 
 /**
  * Calculate Lifetime value for a given set of sales
@@ -516,6 +502,34 @@ document.getElementById('filter-favorites').addEventListener('click', () => {
   renderDeals(favorites); // Affiche uniquement les favoris
 });
 
+// Mettre à jour la classe CSS pour rendre la grille
+const applyGridLayout = () => {
+  document.querySelectorAll('.deal, .sale').forEach(element => {
+    element.classList.add('grid-item');
+  });
+};
+
+SearchButton.addEventListener('click', async () => {
+  const legoSetId = inputLegoSetId.value.trim();
+  console.log("ID du set LEGO sélectionné :", legoSetId); // Vérifie l'ID
+
+  if (legoSetId === "") {
+    console.warn("Veuillez sélectionner un ID de set LEGO.");
+    return;
+  }
+
+  const salesData = await fetchSales(legoSetId);
+  console.log('Ventes récupérées:', salesData); // Vérifie les ventes récupérées
+
+  if (salesData && salesData.length > 0) {
+    renderSales(salesData);
+  } else {
+    console.log('Aucune vente trouvée pour cet ID');
+  }
+});
+
+
+
 //Stocker les deals actuels dans le local storage
 const processSales = (sales) => {
   localStorage.setItem('currentDeals', JSON.stringify(sales)); // Stocke les ventes actuelles
@@ -528,10 +542,5 @@ displayFavoritesButton.addEventListener('click', () => {
   render(favorites, { count: favorites.length, currentPage: 1, pageCount: 1 });
 });
 
-// Mettre à jour la classe CSS pour rendre la grille
-const applyGridLayout = () => {
-  document.querySelectorAll('.deal, .sale').forEach(element => {
-    element.classList.add('grid-item');
-  });
-};
+
 

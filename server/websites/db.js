@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
+import os from 'os';
 
 dotenv.config({ path: './.env' });
 //process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'; // Fix SSL Windows
@@ -8,7 +9,7 @@ dotenv.config({ path: './.env' });
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME;
 
-async function connectToMongoDB() {
+export async function connectToMongoDB() {
   try {
     const client = await MongoClient.connect(MONGODB_URI, {});
 
@@ -16,14 +17,14 @@ async function connectToMongoDB() {
 
     const db = client.db(MONGODB_DB_NAME);
 
-    await importDeals(db);
+    //await importDeals(db);
     await importVintedSales(db);
 
     //await findBestDiscountDeals(db);
     //await findMostCommentedDeals(db);
     //await findDealsSortedByPrice(db);
     //await findDealsSortedByDate(db);
-    await findSalesByLegoSetId(db, '75403');
+    //await findSalesByLegoSetId(db, '75403');
     //await findSalesScrapedLessThanThreeWeeks(db);
 
     await client.close();
@@ -71,26 +72,19 @@ async function importDeals(db) {
 }
 
 async function importVintedSales(db) {
-  
-
   const collection = db.collection('vintedSales');
 
   try {
-    const data = await fs.readFile('./vinted_sales.json', 'utf-8');
+    const data = await fs.readFile(`${os.tmpdir()}/vinted_sales.json`, 'utf-8');
     const sales = JSON.parse(data);
 
     console.log(`🔥 ${sales.length} ventes trouvées`);
 
-    await collection.dropIndexes().catch(() => {});
-    console.log('🛑 Index supprimé');
-
-    await collection.deleteMany({});
-    console.log('🧹 Anciennes données supprimées');
-
-    const result = await collection.insertMany(sales, { ordered: false });
+    // Pas de suppression des anciennes données, on ajoute juste de nouvelles ventes
+    const result = await collection.insertMany(sales, { ordered: false, bypassDocumentValidation: true });
     console.log(`✅ ${result.insertedCount} nouvelles ventes importées`);
 
-    await collection.createIndex({ id: 1 }, { unique: true });
+    await collection.createIndex({ id: 1 }, { unique: true }); // Assurez-vous que l'index unique est créé si ce n'est pas déjà fait
     console.log('🔑 Index unique sur "id" créé');
   } catch (err) {
     if (err.code === 11000) {
@@ -100,6 +94,7 @@ async function importVintedSales(db) {
     }
   }
 }
+
 
 // Le but ici est de faire en sorte que les N/A se retrouvent à la fin du classement et non au début par défaut
 async function findBestDiscountDeals(db) {

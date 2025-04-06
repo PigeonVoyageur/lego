@@ -1,0 +1,29 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "client/v2/index.html",
+        "use": "@vercel/static"
+      },
+      {
+        "src": "server/api.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/(.*)",
+        "dest": "/api/$1"
+      },
+      {
+        "src": "/client/v2/(.*)",
+        "dest": "/client/v2/$1"
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/client/v2/index.html"
+      }
+    ]
+  }
+  
+  
